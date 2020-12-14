@@ -5,9 +5,13 @@ Consiste en un programa con 5 filósofos y 5 tenedores. Cada filósofo pide el d
 
 ### COMPILE
 ```
-mpicxx --oversubscribe -o filosofos filosofos-plantilla.cpp
+mpicxx -std=c++11 -o filosofos filosofos-plantilla.cpp
 ```
 ### RUN
 ```
 mpirun -np 10 filosofos
+```
+if previous doesn't work try next:
+```
+mpirun --oversubscribe -np 10 filosofos
 ```
