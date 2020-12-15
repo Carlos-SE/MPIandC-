@@ -15,7 +15,9 @@ const int id_buffer = 4,
           num_items = 20,
           tam_vector = 10,
           tag_prod = 0,
-          tag_cons = 1;
+          tag_cons = 1,
+          prod_ind = num_items / num_productores,
+          cons_ind = num_items / num_consumidores;
 
 template< int min, int max > int aleatorio()
 {
@@ -24,23 +26,24 @@ template< int min, int max > int aleatorio()
     return distribucion_uniforme( generador );
 }
 
-int producir()
+int producir(int id_prod)
 {
     static int contador = 0 ;
+    int valor = id_prod * prod_ind      +contador;
     sleep_for( milliseconds( aleatorio<10,100>()) );
     contador++ ;
-    cout << "Productor ha producido valor " << contador << endl << flush;
-    return contador ;
+    cout << "Productor " << id_prod << "  ha producido valor " << valor << endl << flush;
+    return valor ;
 }
 
-void funcion_productor()
+void funcion_productor(int id_prod)
 {
-   for ( unsigned int i= 0 ; i < num_items ; i++ )
+   for ( unsigned int i= 0 ; i < prod_ind ; i++ )
    {
         // producir valor
-        int valor_prod = producir();
+        int valor_prod = producir(id_prod);
         // enviar valor
-        cout << "Productor va a enviar valor " << valor_prod << endl << flush;
+        cout << "Productor " << id_prod <<" va a enviar valor " << valor_prod << endl << flush;
         MPI_Ssend( &valor_prod, 1, MPI_INT, id_buffer, tag_prod, MPI_COMM_WORLD );
    }
 }
@@ -96,24 +99,25 @@ void funcion_buffer()
 
 ///////////////////////////////////////////////////////////////////////////////
 
-void consumir( int valor_cons )
+void consumir( int valor_cons, int id_cons)
 {
    // espera bloqueada
    sleep_for( milliseconds( aleatorio<110,200>()) );
-   cout << "Consumidor ha consumido valor " << valor_cons << endl << flush ;
+   cout << "Consumidor  " << id_cons << " ha consumido valor " << valor_cons << endl << flush ;
 }
-void funcion_consumidor()
+
+void funcion_consumidor(int id_cons)
 {
    int         peticion,
                valor_rec = 1 ;
    MPI_Status  estado ;
 
-   for( unsigned int i=0 ; i < num_items; i++ )
+   for( unsigned int i=0 ; i < cons_ind; i++ )
    {
       MPI_Ssend( &peticion,  1, MPI_INT, id_buffer, tag_cons, MPI_COMM_WORLD);
       MPI_Recv ( &valor_rec, 1, MPI_INT, id_buffer, 0, MPI_COMM_WORLD,&estado );
-      cout << "Consumidor ha recibido valor " << valor_rec << endl << flush ;
-      consumir( valor_rec );
+      cout << "Consumidor " << id_cons << " ha recibido valor " << valor_rec << endl << flush ;
+      consumir( valor_rec, id_cons);
    }
 }
 
@@ -130,13 +134,13 @@ int main(int argc, char *argv[]){
 
     if (num_proceso_actual == num_procesos){
         if (id_actual < num_productores){
-            funcion_productor();
+            funcion_productor(id_actual);
         }
         else if (id_actual == num_productores){
             funcion_buffer();
         }
         else{
-            funcion_consumidor();
+            funcion_consumidor(id_actual);
         }
     }
     else{
@@ -147,7 +151,7 @@ int main(int argc, char *argv[]){
 
         }
     }
-    
+
     MPI_Finalize();
     return(0);
 }
