@@ -44,7 +44,7 @@ void funcion_productor(int id_prod)
         int valor_prod = producir(id_prod);
         // enviar valor
         cout << "Productor " << id_prod <<" va a enviar valor " << valor_prod << endl << flush;
-        MPI_Ssend( &valor_prod, 1, MPI_INT, id_buffer, tag_prod, MPI_COMM_WORLD );
+        MPI_Send( &valor_prod, 1, MPI_INT, id_buffer, tag_prod, MPI_COMM_WORLD );
    }
 }
 
@@ -91,7 +91,7 @@ void funcion_buffer()
             primera_ocupada = (primera_ocupada+1) % tam_vector ;
             num_celdas_ocupadas-- ;
             cout << "Buffer va a enviar valor " << valor << endl ;
-            MPI_Ssend( &valor, 1, MPI_INT, id_cons,0, MPI_COMM_WORLD);
+            MPI_Send( &valor, 1, MPI_INT, id_cons,0, MPI_COMM_WORLD);
             break;
       }
    }
@@ -114,7 +114,7 @@ void funcion_consumidor(int id_cons)
 
    for( unsigned int i=0 ; i < cons_ind; i++ )
    {
-      MPI_Ssend( &peticion,  1, MPI_INT, id_buffer, tag_cons, MPI_COMM_WORLD);
+      MPI_Send( &peticion,  1, MPI_INT, id_buffer, tag_cons, MPI_COMM_WORLD);
       MPI_Recv ( &valor_rec, 1, MPI_INT, id_buffer, 0, MPI_COMM_WORLD,&estado );
       cout << "Consumidor " << id_cons << " ha recibido valor " << valor_rec << endl << flush ;
       consumir( valor_rec, id_cons);
