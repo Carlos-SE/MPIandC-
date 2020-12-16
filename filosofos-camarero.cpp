@@ -36,7 +36,7 @@ void funcion_filosofo(int id){
         id_ten_izq = 1;
 
     while (true){
-        cout <<"Filósofo " << id << " sentarse." << endl << flush;
+        cout <<"Filósofo " << id << " solicita sentarse." << endl << flush;
         MPI_Send(&peticion, 1, MPI_INT, camarero, etiq_sentarse, MPI_COMM_WORLD);
 
         cout <<"Filósofo " << id << " solicita ten. izq." << id_ten_izq << endl << flush;
